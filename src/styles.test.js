@@ -12,4 +12,10 @@ describe('layout contract', () => {
   it('sets a 52px minimum touch target for classroom buttons', () => {
     expect(css).toMatch(/min-height:\s*52px/);
   });
+
+  it('reserves independent Quick Check answer and SVG containers without a mode switcher', () => {
+    expect(css).toContain('.answer-panel');
+    expect(css).toContain('.number-line-svg');
+    expect(css).not.toContain('.mode-switcher');
+  });
 });

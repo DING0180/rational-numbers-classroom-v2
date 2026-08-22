@@ -11,14 +11,14 @@ describe('lesson definitions', () => {
     ]);
   });
 
-  it('provides the classroom fields for every lesson', () => {
+  it('keeps only navigation metadata for every Quick Check lesson', () => {
     LESSONS.forEach((lesson) => {
       expect(lesson).toEqual(expect.objectContaining({
         labelZh: expect.any(String),
         labelEn: expect.any(String),
-        explore: expect.any(Object),
-        quickCheck: expect.any(Object),
       }));
+      expect(lesson).not.toHaveProperty('explore');
+      expect(lesson).not.toHaveProperty('quickCheck');
     });
   });
 
