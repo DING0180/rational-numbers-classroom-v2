@@ -27,6 +27,10 @@ button:disabled { cursor: default; opacity: .55; }
 .number-line-svg { inline-size: 100%; max-block-size: min(39vh, 360px); display: block; overflow: visible; }
 .axis, .tick, .point-stem { stroke: #42526a; stroke-width: 3; }
 .axis { stroke-width: 5; }
+.axis-arrow { fill: none; stroke: #0f766e; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+.positive-direction-label { fill: #0f766e; font-family: inherit; font-size: 19px; font-weight: 800; text-anchor: end; }
+.origin-tick { stroke: #dc2626; stroke-width: 6; }
+.origin-label { fill: #dc2626; font-family: inherit; font-size: 25px; font-weight: 850; text-anchor: middle; }
 .number-point { fill: #1d4ed8; stroke: white; stroke-width: 4; }
 .tick-label, .point-label { fill: #172033; font-family: inherit; font-weight: 750; text-anchor: middle; }
 .tick-label { font-size: 22px; }

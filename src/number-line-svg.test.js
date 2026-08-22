@@ -25,3 +25,12 @@ it('uses reduced major-tick labels rather than unreduced hundredths', () => {
   expect(markup).toContain('>−5</text>');
   expect(markup).not.toContain('−500/100');
 });
+
+it('marks the positive direction and the origin distinctly', () => {
+  const markup = renderNumberLineSvg({ visual: { step: 0.5, points: [] } });
+
+  expect(markup).toContain('class="axis-arrow"');
+  expect(markup).toContain('class="positive-direction-label"');
+  expect(markup).toContain('class="origin-tick"');
+  expect(markup).toContain('class="origin-label"');
+});

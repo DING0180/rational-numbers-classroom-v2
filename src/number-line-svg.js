@@ -26,7 +26,8 @@ export function renderNumberLineSvg(question) {
     const x = valueToX(tick, DOMAIN_START, DOMAIN_END, WIDTH, PADDING);
     const label = formatRational(rational(Math.round(tick * 100), 100));
     const showLabel = index % labelEvery === 0;
-    return `<line class="tick" x1="${x}" y1="170" x2="${x}" y2="190" />${showLabel ? `<text class="tick-label" x="${x}" y="240">${label}</text>` : ''}`;
+    const isOrigin = Math.abs(tick) < Number.EPSILON;
+    return `<line class="${isOrigin ? 'origin-tick' : 'tick'}" x1="${x}" y1="${isOrigin ? 162 : 170}" x2="${x}" y2="${isOrigin ? 198 : 190}" />${showLabel ? `<text class="${isOrigin ? 'origin-label' : 'tick-label'}" x="${x}" y="240">${label}</text>` : ''}`;
   }).join('');
 
   const pointMarkup = sortedPoints.map((point, index) => {
@@ -35,5 +36,5 @@ export function renderNumberLineSvg(question) {
     return `<line class="point-stem" x1="${x}" y1="${labelY + 12}" x2="${x}" y2="154" /><circle class="number-point" cx="${x}" cy="180" r="11" /><text class="point-label" x="${x}" y="${labelY}">${point.letter}</text>`;
   }).join('');
 
-  return `<svg class="number-line-svg" viewBox="0 0 1200 320" role="img" aria-label="Number line from negative five to five with labelled points"><title>Number line from −5 to 5</title><line class="axis" x1="${PADDING}" y1="180" x2="${WIDTH - PADDING}" y2="180" />${tickMarkup}${pointMarkup}</svg>`;
+  return `<svg class="number-line-svg" viewBox="0 0 1200 320" role="img" aria-label="Number line from negative five to five with labelled points, a positive direction arrow, and a highlighted origin"><title>Number line from −5 to 5</title><line class="axis" x1="${PADDING}" y1="180" x2="${WIDTH - PADDING}" y2="180" /><path class="axis-arrow" d="M ${WIDTH - PADDING} 180 L ${WIDTH - PADDING - 26} 164 M ${WIDTH - PADDING} 180 L ${WIDTH - PADDING - 26} 196" /><text class="positive-direction-label" x="${WIDTH - PADDING}" y="34">positive direction (+)</text>${tickMarkup}${pointMarkup}</svg>`;
 }
