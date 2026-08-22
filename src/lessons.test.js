@@ -11,6 +11,17 @@ describe('lesson definitions', () => {
     ]);
   });
 
+  it('provides the classroom fields for every lesson', () => {
+    LESSONS.forEach((lesson) => {
+      expect(lesson).toEqual(expect.objectContaining({
+        labelZh: expect.any(String),
+        labelEn: expect.any(String),
+        explore: expect.any(Object),
+        quickCheck: expect.any(Object),
+      }));
+    });
+  });
+
   it('returns the selected lesson by id', () => {
     expect(getLesson('opposite').labelEn).toBe('Opposite');
   });

@@ -61,3 +61,52 @@ Result: exit code 1; the same `vitest` unavailable error.
 
 - A `package-lock.json` could not be generated because `npm install` stalled under the restricted network and had to be interrupted.
 - Automated GREEN/full-suite verification remains blocked until the declared dependencies are available.
+
+## Review fix round
+
+### Findings addressed
+
+- Added a test asserting every lesson contains `labelZh`, `labelEn`, `explore`, and `quickCheck` with the expected broad value types.
+- Added and validated the required `package-lock.json` for reproducible dependency installation.
+
+### Dependency diagnostic
+
+The earlier `npm install` had appeared stalled and was interrupted, but the dependency state subsequently contained `node_modules` and `package-lock.json`. The narrow lockfile validation command was then run:
+
+```text
+npm install --package-lock-only --ignore-scripts
+```
+
+Output:
+
+```text
+up to date in 692ms
+
+15 packages are looking for funding
+  run `npm fund` for details
+```
+
+Exit code: 0.
+
+### Fix-round test evidence
+
+Focused command:
+
+```text
+npm test -- --run src/lessons.test.js
+```
+
+Output summary: `1 passed` test file, `3 passed` tests; Vitest `v3.2.7`; exit code 0.
+
+Full relevant suite:
+
+```text
+npm run test:run
+```
+
+Output summary: `1 passed` test file, `3 passed` tests; exit code 0.
+
+### Fix-round concerns
+
+- `node_modules/` remains untracked and is intentionally excluded from the commit.
+- The pre-existing untracked `docs/superpowers/plans/` directory remains untouched.
