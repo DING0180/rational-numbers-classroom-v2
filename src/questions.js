@@ -3,9 +3,9 @@ import { absolute, compare, formatRational, negate, rational, rationalKey } from
 const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
 const CONTROL_SETS = {
   'number-line': ['number-to-point', 'point-to-number', 'easy', 'challenge', 'new-question', 'reveal', 'next'],
-  opposite: ['new-question', 'reveal', 'next'],
-  'absolute-value': ['new-question', 'reveal', 'next'],
-  compare: ['new-question', 'reveal', 'next'],
+  opposite: ['easy', 'challenge', 'new-question', 'reveal', 'next'],
+  'absolute-value': ['easy', 'challenge', 'new-question', 'reveal', 'next'],
+  compare: ['easy', 'challenge', 'new-question', 'reveal', 'next'],
 };
 
 const randomInt = (random, minimum, maximum) => minimum + Math.floor(random() * (maximum - minimum + 1));
@@ -57,17 +57,19 @@ function numberLineQuestion(options, random) {
   };
 }
 
-function sourceValue(random) {
-  const kind = pick(random, ['integer', 'decimal', 'fraction']);
-  if (kind === 'integer') return rational(pick(random, [-6, -5, -4, -3, -2, 2, 3, 4, 5, 6]));
-  if (kind === 'decimal') return rational(pick(random, [-25, -15, -5, 5, 15, 25, 35]), 10);
-  return rational(pick(random, [-5, -4, -3, -2, 2, 3, 4, 5]), pick(random, [2, 3, 4]));
+function sourceValue(random, difficulty) {
+  const easyValues = [-6, -5, -4, -3, -2, 2, 3, 4, 5, 6];
+  const challengeTenths = [-35, -25, -15, -5, 5, 15, 25, 35];
+  return difficulty === 'challenge' && pick(random, ['integer', 'decimal']) === 'decimal'
+    ? rational(pick(random, challengeTenths), 10)
+    : rational(pick(random, easyValues));
 }
 
-function oppositeQuestion(random) {
-  const value = sourceValue(random);
-  const layers = randomInt(random, 2, 4);
-  const signs = Array.from({ length: layers }, () => pick(random, [-1, 1]));
+function oppositeQuestion(options, random) {
+  const difficulty = options.difficulty === 'challenge' ? 'challenge' : 'easy';
+  const value = sourceValue(random, difficulty);
+  const layers = difficulty === 'challenge' ? randomInt(random, 3, 4) : 1;
+  const signs = difficulty === 'challenge' ? Array.from({ length: layers }, () => pick(random, [-1, 1])) : [pick(random, [-1, 1])];
   const multiplier = signs.reduce((total, sign) => total * sign, 1);
   const answerValue = multiplier === -1 ? negate(value) : value;
   const body = formatRational(value);
@@ -78,15 +80,17 @@ function oppositeQuestion(random) {
     prompt: `Simplify: ${expression}`,
     answer: formatRational(answerValue),
     explanation: `${expression} = ${formatRational(answerValue)}`,
-    fingerprint: `opposite:${rationalKey(value)}:${signs.join('')}`,
+    fingerprint: `opposite:${difficulty}:${rationalKey(value)}:${signs.join('')}`,
     controls: CONTROL_SETS.opposite,
+    difficulty,
   };
 }
 
-function absoluteValueQuestion(random) {
-  const value = sourceValue(random);
-  const innerSign = pick(random, [-1, 1]);
-  const outerSign = pick(random, [-1, 1]);
+function absoluteValueQuestion(options, random) {
+  const difficulty = options.difficulty === 'challenge' ? 'challenge' : 'easy';
+  const value = sourceValue(random, difficulty);
+  const innerSign = difficulty === 'challenge' ? pick(random, [-1, 1]) : -1;
+  const outerSign = difficulty === 'challenge' ? pick(random, [-1, 1]) : 1;
   const inner = innerSign === -1 ? negate(value) : value;
   const answerValue = outerSign === -1 ? negate(absolute(inner)) : absolute(inner);
   const expression = `${signText(outerSign)}|${signText(innerSign)}(${formatRational(value)})|`;
@@ -96,34 +100,41 @@ function absoluteValueQuestion(random) {
     prompt: `Simplify: ${expression}`,
     answer: formatRational(answerValue),
     explanation: `Inside: ${formatRational(inner)}; |${formatRational(inner)}| = ${formatRational(absolute(inner))}; result: ${formatRational(answerValue)}.`,
-    fingerprint: `absolute:${rationalKey(value)}:${innerSign}:${outerSign}`,
+    fingerprint: `absolute:${difficulty}:${rationalKey(value)}:${innerSign}:${outerSign}`,
     controls: CONTROL_SETS['absolute-value'],
+    difficulty,
   };
 }
 
-function compareQuestion(random) {
-  const left = sourceValue(random);
-  let right = sourceValue(random);
-  if (compare(left, right) === 0) right = rational(right.numerator + right.denominator, right.denominator);
-  const relation = compare(left, right) < 0 ? '<' : '>';
-  const leftText = formatRational(left);
-  const rightText = formatRational(right);
+function compareQuestion(options, random) {
+  const difficulty = options.difficulty === 'challenge' ? 'challenge' : 'easy';
+  const left = sourceValue(random, difficulty);
+  let right = sourceValue(random, difficulty);
+  const leftValue = difficulty === 'challenge' ? absolute(left) : left;
+  if (compare(leftValue, right) === 0) right = rational(right.numerator + right.denominator, right.denominator);
+  const rightValue = right;
+  const relation = compare(leftValue, rightValue) < 0 ? '<' : '>';
+  const leftText = difficulty === 'challenge' ? `|${formatRational(negate(left))}|` : formatRational(left);
+  const rightText = difficulty === 'challenge' ? `−(${formatRational(negate(right))})` : formatRational(right);
 
   return {
     id: 'compare',
     prompt: `Compare: ${leftText}  □  ${rightText}`,
     answer: relation,
-    explanation: `${leftText} ${relation} ${rightText}; therefore the symbol is ${relation}.`,
-    fingerprint: `compare:${rationalKey(left)}:${rationalKey(right)}`,
+    explanation: difficulty === 'challenge'
+      ? `${leftText} = ${formatRational(leftValue)}; ${rightText} = ${formatRational(rightValue)}; therefore ${formatRational(leftValue)} ${relation} ${formatRational(rightValue)}.`
+      : `${leftText} ${relation} ${rightText}; therefore the symbol is ${relation}.`,
+    fingerprint: `compare:${difficulty}:${rationalKey(left)}:${rationalKey(right)}`,
     controls: CONTROL_SETS.compare,
+    difficulty,
   };
 }
 
 const BUILDERS = {
   'number-line': (options, random) => numberLineQuestion(options, random),
-  opposite: (_options, random) => oppositeQuestion(random),
-  'absolute-value': (_options, random) => absoluteValueQuestion(random),
-  compare: (_options, random) => compareQuestion(random),
+  opposite: (options, random) => oppositeQuestion(options, random),
+  'absolute-value': (options, random) => absoluteValueQuestion(options, random),
+  compare: (options, random) => compareQuestion(options, random),
 };
 
 export function createQuestion(lessonId, options = {}, recentFingerprints = [], random = Math.random) {

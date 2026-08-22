@@ -35,7 +35,7 @@ export const equals = (left, right) => compare(left, right) === 0;
 
 export function formatRational(value) {
   if (value.denominator === 1) return String(value.numerator).replace('-', '−');
-  if ([2, 5, 10].includes(value.denominator)) {
+  if ([2, 4, 5, 10].includes(value.denominator)) {
     return String(value.numerator / value.denominator).replace('-', '−');
   }
   return `${value.numerator < 0 ? '−' : ''}${Math.abs(value.numerator)}/${value.denominator}`;

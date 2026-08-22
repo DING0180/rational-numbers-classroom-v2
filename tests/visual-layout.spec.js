@@ -53,10 +53,11 @@ for (const viewport of viewports) {
       await expect(page.locator('[data-answer-panel]')).toHaveClass(/answer-panel--visible/);
       await page.getByRole('button', { name: 'Next' }).click();
       await expect(page.locator('[data-answer-panel]')).not.toHaveClass(/answer-panel--visible/);
+      await page.locator('[data-difficulty="challenge"]').click();
+      await expect(page.locator('[data-difficulty="challenge"]')).toHaveAttribute('aria-pressed', 'true');
 
       if (lesson.id === 'number-line') {
         await page.locator('[data-direction="point-to-number"]').click();
-        await page.locator('[data-difficulty="challenge"]').click();
         await expect(page.locator('[data-number-line] svg')).toBeVisible();
       } else {
         await expect(page.locator('[data-direction]')).toHaveCount(0);

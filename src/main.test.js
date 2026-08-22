@@ -16,12 +16,12 @@ describe('Quick Check state', () => {
     expect(renderApp(revealed)).toContain('answer-panel--visible');
   });
 
-  it('only renders Number Line direction and difficulty controls for Number Line', () => {
+  it('renders difficulty controls for every lesson but direction controls only for Number Line', () => {
     const numberLine = renderApp(createInitialState(() => 0.3));
     const opposite = renderApp(reduceState(createInitialState(() => 0.3), { type: 'select-lesson', lessonId: 'opposite' }, () => 0.5));
     expect(numberLine).toContain('data-direction="number-to-point"');
     expect(numberLine).toContain('data-difficulty="challenge"');
     expect(opposite).not.toContain('data-direction');
-    expect(opposite).not.toContain('data-difficulty');
+    expect(opposite).toContain('data-difficulty="challenge"');
   });
 });
