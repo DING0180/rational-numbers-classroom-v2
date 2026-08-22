@@ -1,4 +1,4 @@
-import { formatRational } from './rational.js';
+import { formatRational, rational } from './rational.js';
 
 const DOMAIN_START = -5;
 const DOMAIN_END = 5;
@@ -24,7 +24,7 @@ export function renderNumberLineSvg(question) {
 
   const tickMarkup = ticks.map((tick, index) => {
     const x = valueToX(tick, DOMAIN_START, DOMAIN_END, WIDTH, PADDING);
-    const label = formatRational({ numerator: Math.round(tick * 100), denominator: 100 });
+    const label = formatRational(rational(Math.round(tick * 100), 100));
     const showLabel = index % labelEvery === 0;
     return `<line class="tick" x1="${x}" y1="170" x2="${x}" y2="190" />${showLabel ? `<text class="tick-label" x="${x}" y="240">${label}</text>` : ''}`;
   }).join('');

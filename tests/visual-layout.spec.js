@@ -6,124 +6,64 @@ const lessons = [
   { id: 'absolute-value', name: 'Absolute Value' },
   { id: 'compare', name: 'Comparing Rational Numbers' },
 ];
-
-const modes = [
-  { id: 'explore', name: 'Explore' },
-  { id: 'quick-check', name: 'Quick Check' },
-];
-
-async function expectAllVisibleBoxesInViewport(page, viewport) {
-  const outOfViewport = await page.locator('body *').evaluateAll((elements) => elements
-    .filter((element) => {
-      const style = getComputedStyle(element);
-      const box = element.getBoundingClientRect();
-      return style.display !== 'none'
-        && style.visibility !== 'hidden'
-        && box.width > 0
-        && box.height > 0;
-    })
-    .map((element) => {
-      const box = element.getBoundingClientRect();
-      return {
-        tag: element.tagName,
-        className: element.className,
-        left: box.left,
-        right: box.right,
-        top: box.top,
-        bottom: box.bottom,
-      };
-    })
-    .filter((box) => box.left < 0
-      || box.top < 0
-      || box.right > viewport.width
-      || box.bottom > viewport.height));
-
-  expect(outOfViewport).toEqual([]);
-}
-
-async function expectButtonsDoNotCollide(page) {
-  const collisions = await page.locator('button').evaluateAll((buttons) => {
-    const boxes = buttons.map((button) => {
-      const box = button.getBoundingClientRect();
-      return {
-        label: button.textContent.trim(),
-        left: box.left,
-        right: box.right,
-        top: box.top,
-        bottom: box.bottom,
-      };
-    });
-
-    return boxes.flatMap((first, index) => boxes.slice(index + 1)
-      .filter((second) => first.left < second.right
-        && first.right > second.left
-        && first.top < second.bottom
-        && first.bottom > second.top)
-      .map((second) => ({ first: first.label, second: second.label })));
-  });
-
-  expect(collisions).toEqual([]);
-}
-
-async function expectStageDominates(page) {
-  const [stage, header, switcher, controls] = await Promise.all([
-    page.locator('[data-stage]').boundingBox(),
-    page.locator('.workspace-header').boundingBox(),
-    page.locator('.mode-switcher').boundingBox(),
-    page.locator('.teacher-controls').boundingBox(),
-  ]);
-
-  expect(stage).not.toBeNull();
-  expect(header).not.toBeNull();
-  expect(switcher).not.toBeNull();
-  expect(controls).not.toBeNull();
-
-  const stageArea = stage.width * stage.height;
-  expect(stageArea).toBeGreaterThan(header.width * header.height);
-  expect(stageArea).toBeGreaterThan(switcher.width * switcher.height);
-  expect(stageArea).toBeGreaterThan(controls.width * controls.height);
-}
-
-for (const viewport of [
+const viewports = [
   { name: '1920x1080', width: 1920, height: 1080 },
   { name: '1366x768', width: 1366, height: 768 },
   { name: '1280x720', width: 1280, height: 720 },
-]) {
-  test(`classroom shell fits and switches every lesson/mode state at ${viewport.name}`, async ({ page }, testInfo) => {
+];
+
+async function expectGeometry(page, viewport) {
+  const result = await page.evaluate(() => {
+    const boxes = [...document.querySelectorAll('button')].map((element) => {
+      const box = element.getBoundingClientRect();
+      return { label: element.textContent.trim(), left: box.left, right: box.right, top: box.top, bottom: box.bottom, height: box.height };
+    });
+    const collision = boxes.some((box, index) => boxes.slice(index + 1).some((other) => box.left < other.right && box.right > other.left && box.top < other.bottom && box.bottom > other.top));
+    const stage = document.querySelector('[data-stage]').getBoundingClientRect();
+    const sidebar = document.querySelector('.sidebar').getBoundingClientRect();
+    const controls = document.querySelector('.teacher-controls').getBoundingClientRect();
+    const overflow = [...document.querySelectorAll('body *')].some((element) => {
+      const style = getComputedStyle(element);
+      const box = element.getBoundingClientRect();
+      return style.display !== 'none' && box.width > 0 && box.height > 0 && (box.left < -1 || box.right > innerWidth + 1 || box.top < -1 || box.bottom > innerHeight + 1);
+    });
+    return { scrollWidth: document.documentElement.scrollWidth, buttonHeights: boxes.map(({ height }) => height), collision, overflow, stage, sidebar, controls };
+  });
+  expect(result.scrollWidth).toBe(viewport.width);
+  expect(result.buttonHeights.every((height) => height >= 52)).toBe(true);
+  expect(result.collision).toBe(false);
+  expect(result.overflow).toBe(false);
+  expect(result.stage.width).toBeGreaterThan(result.sidebar.width * 3);
+  expect(result.stage.width * result.stage.height).toBeGreaterThan(result.controls.width * result.controls.height);
+}
+
+for (const viewport of viewports) {
+  test(`Quick Check remains touch-safe at ${viewport.name}`, async ({ page }, testInfo) => {
     await page.setViewportSize(viewport);
     await page.goto('/');
+    await expect(page.getByText('Explore')).toHaveCount(0);
 
     for (const lesson of lessons) {
       await page.locator(`[data-lesson="${lesson.id}"]`).click();
+      await expect(page.locator(`[data-lesson="${lesson.id}"]`)).toHaveAttribute('aria-current', 'page');
+      await expect(page.locator('#lesson-title')).toContainText(lesson.name);
+      await expect(page.locator('[data-answer-panel] .answer-label')).toHaveCount(0);
+      await page.getByRole('button', { name: 'New Question' }).click();
+      await page.getByRole('button', { name: 'Reveal Answer' }).click();
+      await expect(page.locator('[data-answer-panel]')).toHaveClass(/answer-panel--visible/);
+      await page.getByRole('button', { name: 'Next' }).click();
+      await expect(page.locator('[data-answer-panel]')).not.toHaveClass(/answer-panel--visible/);
 
-      for (const mode of modes) {
-        await page.locator(`[data-mode="${mode.id}"]`).click();
-
-        await expect(page.locator('[data-lesson][aria-current="page"]')).toHaveCount(1);
-        await expect(page.locator(`[data-lesson="${lesson.id}"]`)).toHaveAttribute('aria-current', 'page');
-        await expect(page.locator('[data-mode][aria-pressed="true"]')).toHaveCount(1);
-        await expect(page.locator(`[data-mode="${mode.id}"]`)).toHaveAttribute('aria-pressed', 'true');
-        await expect(page.locator('[data-stage]')).toContainText(mode.name);
-        await expect(page.locator('#lesson-title')).toContainText(lesson.name);
-
-        const documentWidth = await page.evaluate(() => ({
-          innerWidth: window.innerWidth,
-          scrollWidth: document.documentElement.scrollWidth,
-        }));
-        expect(documentWidth.innerWidth).toBe(viewport.width);
-        expect(documentWidth.scrollWidth).toBe(documentWidth.innerWidth);
-        await expectAllVisibleBoxesInViewport(page, viewport);
-        await expectButtonsDoNotCollide(page);
-        const buttonHeights = await page.locator('button').evaluateAll((buttons) => buttons
-          .map((button) => button.getBoundingClientRect().height));
-        expect(buttonHeights.every((height) => height >= 52)).toBe(true);
-        await expectStageDominates(page);
-
-        await page.screenshot({
-          path: testInfo.outputPath(`${viewport.name}-${lesson.id}-${mode.id}.png`),
-          fullPage: true,
-        });
+      if (lesson.id === 'number-line') {
+        await page.locator('[data-direction="point-to-number"]').click();
+        await page.locator('[data-difficulty="challenge"]').click();
+        await expect(page.locator('[data-number-line] svg')).toBeVisible();
+      } else {
+        await expect(page.locator('[data-direction]')).toHaveCount(0);
       }
+
+      await expectGeometry(page, viewport);
+      await page.screenshot({ path: testInfo.outputPath(`${viewport.name}-${lesson.id}.png`), fullPage: true });
     }
   });
 }

@@ -19,3 +19,9 @@ it('renders independent tick and point-label bands', () => {
   expect(markup).toContain('class="point-label"');
   expect(markup).toContain('viewBox="0 0 1200 320"');
 });
+
+it('uses reduced major-tick labels rather than unreduced hundredths', () => {
+  const markup = renderNumberLineSvg({ visual: { step: 0.5, points: [] } });
+  expect(markup).toContain('>−5</text>');
+  expect(markup).not.toContain('−500/100');
+});
