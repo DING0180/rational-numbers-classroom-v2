@@ -1,4 +1,5 @@
 import { LESSONS, getLesson } from './lessons.js';
+import './styles.css';
 
 const MODES = [
   { id: 'explore', labelZh: '探索', labelEn: 'Explore', lessonField: 'explore' },
@@ -58,7 +59,7 @@ export function renderApp(state) {
         <section class="classroom-stage" data-stage aria-live="polite" aria-labelledby="stage-title">
           <p class="stage-mode"><span lang="zh-CN">${mode.labelZh}</span> / <span lang="en">${mode.labelEn}</span></p>
           <h2 id="stage-title">${stage.heading}</h2>
-          <p>${stage.description}</p>
+          <p class="stage-description">${stage.description}</p>
           <div class="stage-reserved-area" aria-label="${stage.zoneLabel}">
             <p>${stage.zoneLabel}</p>
           </div>

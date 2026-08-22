@@ -1,0 +1,271 @@
+:root {
+  color: #172033;
+  background: #eaf0f8;
+  font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+  font-synthesis: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  min-block-size: 100%;
+  margin: 0;
+}
+
+body {
+  min-inline-size: 0;
+}
+
+button {
+  min-height: 52px;
+  border: 0;
+  border-radius: 12px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+button:focus-visible {
+  outline: 3px solid #f59e0b;
+  outline-offset: 3px;
+}
+
+.classroom-app {
+  min-block-size: 100dvh;
+  display: grid;
+  grid-template-columns: clamp(220px, 18vw, 280px) minmax(0, 1fr);
+  overflow: hidden;
+}
+
+.sidebar {
+  min-block-size: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 28px 20px;
+  background: #172033;
+  color: #f8fafc;
+}
+
+.sidebar-header p,
+.workspace-header p,
+.stage-mode,
+.teacher-controls h2 {
+  margin: 0;
+  color: #5b6b82;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sidebar-header p {
+  color: #b9c7dc;
+}
+
+.sidebar-header h2 {
+  margin: 8px 0 0;
+  font-size: 1.55rem;
+}
+
+.sidebar nav {
+  min-block-size: 0;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  overflow: auto;
+}
+
+.sidebar button {
+  min-inline-size: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  background: #25324a;
+  color: #f8fafc;
+  text-align: left;
+}
+
+.sidebar button span:last-child {
+  color: #c7d2e4;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-align: right;
+}
+
+.sidebar button[aria-current='page'] {
+  background: #1d4ed8;
+  color: #fff;
+}
+
+.workspace {
+  min-inline-size: 0;
+  min-block-size: 0;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  gap: clamp(12px, 1.8vh, 20px);
+  padding: clamp(18px, 2.4vw, 36px) clamp(20px, 3.5vw, 64px);
+  overflow: hidden;
+}
+
+.workspace-header h1 {
+  margin: 6px 0 0;
+  color: #172033;
+  font-size: clamp(1.65rem, 2.4vw, 2.65rem);
+  line-height: 1.15;
+}
+
+.mode-switcher {
+  min-inline-size: 0;
+  display: flex;
+  gap: 10px;
+}
+
+.mode-switcher button {
+  min-inline-size: min(260px, 40%);
+  padding: 12px 18px;
+  background: #d8e1ee;
+  color: #273449;
+}
+
+.mode-switcher button[aria-pressed='true'] {
+  background: #0f766e;
+  color: #fff;
+}
+
+.classroom-stage {
+  min-inline-size: 0;
+  min-block-size: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(10px, 1.6vh, 18px);
+  padding: clamp(22px, 3vw, 48px);
+  overflow: hidden;
+  border: 2px solid #b9c7dc;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 16px 32px rgb(46 63 91 / 12%);
+}
+
+.classroom-stage h2,
+.classroom-stage > p {
+  margin: 0;
+}
+
+.classroom-stage h2 {
+  color: #172033;
+  font-size: clamp(1.5rem, 2.2vw, 2.45rem);
+  line-height: 1.2;
+}
+
+.stage-description {
+  max-inline-size: 68ch;
+  color: #42526a;
+  font-size: clamp(1rem, 1.25vw, 1.2rem);
+  line-height: 1.55;
+}
+
+.stage-reserved-area {
+  min-block-size: clamp(180px, 34vh, 440px);
+  min-inline-size: 0;
+  flex: 1 1 auto;
+  display: grid;
+  place-items: center;
+  margin-block-start: auto;
+  padding: 20px;
+  border: 2px dashed #7b93b6;
+  border-radius: 16px;
+  background: #f3f7fc;
+  color: #365274;
+  text-align: center;
+}
+
+.stage-reserved-area p {
+  margin: 0;
+  font-size: clamp(1rem, 1.6vw, 1.35rem);
+  font-weight: 800;
+}
+
+.teacher-controls {
+  min-inline-size: 0;
+  display: grid;
+  gap: 6px;
+  padding: 14px 18px;
+  border-left: 5px solid #f59e0b;
+  border-radius: 12px;
+  background: #fff7e6;
+}
+
+.teacher-controls p {
+  margin: 0;
+  color: #4b5563;
+  line-height: 1.45;
+}
+
+@media (max-height: 768px) {
+  .sidebar {
+    gap: 14px;
+    padding-block: 16px;
+  }
+
+  .workspace {
+    gap: 10px;
+    padding-block: 14px;
+  }
+
+  .workspace-header p,
+  .stage-description,
+  .teacher-controls p {
+    display: none;
+  }
+
+  .classroom-stage {
+    gap: 10px;
+    padding: 20px 24px;
+  }
+
+  .stage-reserved-area {
+    min-block-size: 0;
+  }
+}
+
+@media (max-width: 820px) {
+  .classroom-app {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    overflow: visible;
+  }
+
+  .sidebar {
+    gap: 12px;
+    padding: 14px 18px;
+  }
+
+  .sidebar nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .workspace {
+    overflow: visible;
+  }
+}
+
+@media (max-width: 520px) {
+  .sidebar nav {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .mode-switcher {
+    flex-direction: column;
+  }
+
+  .mode-switcher button {
+    min-inline-size: 0;
+  }
+}
