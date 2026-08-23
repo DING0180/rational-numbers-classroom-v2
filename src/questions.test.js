@@ -16,7 +16,7 @@ describe('Quick Check question templates', () => {
     );
 
     expect(question.prompt).not.toContain('Answer:');
-    expect(question.controls).toEqual(expect.arrayContaining(['number-to-point', 'easy', 'reveal']));
+    expect(question).not.toHaveProperty('controls');
     expect(question.visual.points).toHaveLength(4);
   });
 
@@ -70,3 +70,4 @@ describe('Quick Check question templates', () => {
     expect(next.fingerprint).not.toBe(first.fingerprint);
   });
 });
+
