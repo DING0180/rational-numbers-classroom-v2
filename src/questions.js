@@ -1,12 +1,6 @@
 import { absolute, compare, formatRational, negate, rational, rationalKey } from './rational.js';
 
 const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
-const CONTROL_SETS = {
-  'number-line': ['number-to-point', 'point-to-number', 'easy', 'challenge', 'new-question', 'reveal', 'next'],
-  opposite: ['easy', 'challenge', 'new-question', 'reveal', 'next'],
-  'absolute-value': ['easy', 'challenge', 'new-question', 'reveal', 'next'],
-  compare: ['easy', 'challenge', 'new-question', 'reveal', 'next'],
-};
 
 const randomInt = (random, minimum, maximum) => minimum + Math.floor(random() * (maximum - minimum + 1));
 const pick = (random, values) => values[Math.min(values.length - 1, Math.floor(random() * values.length))];
@@ -52,7 +46,6 @@ function numberLineQuestion(options, random) {
       ? `${targetValue} corresponds to point ${target.letter}.`
       : `Point ${target.letter} is at ${targetValue}.`,
     fingerprint: `number-line:${direction}:${difficulty}:${points.map((point) => `${point.letter}${rationalKey(point.value)}`).join(',')}:${target.letter}`,
-    controls: CONTROL_SETS['number-line'],
     visual: { step, points, targetLetter: target.letter, direction, difficulty },
   };
 }
@@ -81,7 +74,6 @@ function oppositeQuestion(options, random) {
     answer: formatRational(answerValue),
     explanation: `${expression} = ${formatRational(answerValue)}`,
     fingerprint: `opposite:${difficulty}:${rationalKey(value)}:${signs.join('')}`,
-    controls: CONTROL_SETS.opposite,
     difficulty,
   };
 }
@@ -101,7 +93,6 @@ function absoluteValueQuestion(options, random) {
     answer: formatRational(answerValue),
     explanation: `Inside: ${formatRational(inner)}; |${formatRational(inner)}| = ${formatRational(absolute(inner))}; result: ${formatRational(answerValue)}.`,
     fingerprint: `absolute:${difficulty}:${rationalKey(value)}:${innerSign}:${outerSign}`,
-    controls: CONTROL_SETS['absolute-value'],
     difficulty,
   };
 }
@@ -125,7 +116,6 @@ function compareQuestion(options, random) {
       ? `${leftText} = ${formatRational(leftValue)}; ${rightText} = ${formatRational(rightValue)}; therefore ${formatRational(leftValue)} ${relation} ${formatRational(rightValue)}.`
       : `${leftText} ${relation} ${rightText}; therefore the symbol is ${relation}.`,
     fingerprint: `compare:${difficulty}:${rationalKey(left)}:${rationalKey(right)}`,
-    controls: CONTROL_SETS.compare,
     difficulty,
   };
 }
@@ -147,3 +137,4 @@ export function createQuestion(lessonId, options = {}, recentFingerprints = [], 
   }
   return candidate;
 }
+
