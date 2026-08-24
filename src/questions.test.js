@@ -70,3 +70,4 @@ describe('Quick Check question templates', () => {
     expect(next.fingerprint).not.toBe(first.fingerprint);
   });
 });
+
