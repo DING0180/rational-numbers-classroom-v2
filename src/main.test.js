@@ -24,4 +24,13 @@ describe('Quick Check state', () => {
     expect(opposite).not.toContain('data-direction');
     expect(opposite).toContain('data-difficulty="challenge"');
   });
+
+  it('groups lesson settings and teacher actions without changing their controls', () => {
+    const html = renderApp(createInitialState(() => 0.3));
+    expect(html).toContain('class="control-group control-group--settings"');
+    expect(html).toContain('class="control-group control-group--actions"');
+    expect(html).toContain('data-direction="number-to-point"');
+    expect(html).toContain('data-difficulty="easy"');
+    expect(html).toContain('data-action="reveal"');
+  });
 });

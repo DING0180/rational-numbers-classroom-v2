@@ -22,18 +22,36 @@ async function expectGeometry(page, viewport) {
     const stage = document.querySelector('[data-stage]').getBoundingClientRect();
     const sidebar = document.querySelector('.sidebar').getBoundingClientRect();
     const controls = document.querySelector('.teacher-controls').getBoundingClientRect();
+    const question = document.querySelector('.question-panel').getBoundingClientRect();
+    const answer = document.querySelector('[data-answer-panel]').getBoundingClientRect();
+    const groups = [...document.querySelectorAll('.control-group')]
+      .map((element) => element.getBoundingClientRect());
     const overflow = [...document.querySelectorAll('body *')].some((element) => {
       const style = getComputedStyle(element);
       const box = element.getBoundingClientRect();
       return style.display !== 'none' && box.width > 0 && box.height > 0 && (box.left < -1 || box.right > innerWidth + 1 || box.top < -1 || box.bottom > innerHeight + 1);
     });
-    return { scrollWidth: document.documentElement.scrollWidth, buttonHeights: boxes.map(({ height }) => height), collision, overflow, stage, sidebar, controls };
+    return { scrollWidth: document.documentElement.scrollWidth, buttonHeights: boxes.map(({ height }) => height), collision, overflow, stage, sidebar, controls, question, answer, groups };
   });
   expect(result.scrollWidth).toBe(viewport.width);
   expect(result.buttonHeights.every((height) => height >= 52)).toBe(true);
   expect(result.collision).toBe(false);
   expect(result.overflow).toBe(false);
   expect(result.stage.width).toBeGreaterThan(result.sidebar.width * 3);
+  expect(result.groups).toHaveLength(2);
+  for (const box of [result.question, result.answer]) {
+    expect(box.left).toBeGreaterThanOrEqual(result.stage.left - 1);
+    expect(box.top).toBeGreaterThanOrEqual(result.stage.top - 1);
+    expect(box.right).toBeLessThanOrEqual(result.stage.right + 1);
+    expect(box.bottom).toBeLessThanOrEqual(result.stage.bottom + 1);
+  }
+  expect(result.groups.every((box) => box.width > 0 && box.height > 0)).toBe(true);
+  expect(
+    result.answer.bottom <= result.controls.top + 1
+      || result.answer.top >= result.controls.bottom - 1
+      || result.answer.right <= result.controls.left + 1
+      || result.answer.left >= result.controls.right - 1,
+  ).toBe(true);
   expect(result.stage.width * result.stage.height).toBeGreaterThan(result.controls.width * result.controls.height);
 }
 
@@ -51,6 +69,7 @@ for (const viewport of viewports) {
       await page.getByRole('button', { name: 'New Question' }).click();
       await page.getByRole('button', { name: 'Reveal Answer' }).click();
       await expect(page.locator('[data-answer-panel]')).toHaveClass(/answer-panel--visible/);
+      await expectGeometry(page, viewport);
       await page.getByRole('button', { name: 'Next' }).click();
       await expect(page.locator('[data-answer-panel]')).not.toHaveClass(/answer-panel--visible/);
       await page.locator('[data-difficulty="challenge"]').click();

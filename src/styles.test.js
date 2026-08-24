@@ -18,4 +18,13 @@ describe('layout contract', () => {
     expect(css).toContain('.number-line-svg');
     expect(css).not.toContain('.mode-switcher');
   });
+
+  it('defines the classroom token system and command-dock group styles', () => {
+    expect(css).toContain('--canvas:');
+    expect(css).toContain('--ink:');
+    expect(css).toContain('--primary:');
+    expect(css).toContain('.control-group--settings');
+    expect(css).toContain('.control-group--actions');
+    expect(css).toContain('prefers-reduced-motion');
+  });
 });
