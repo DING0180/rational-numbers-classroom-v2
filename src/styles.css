@@ -26,7 +26,7 @@ button:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
 button:active:not(:disabled) { transform: translateY(1px); box-shadow: inset 0 2px 0 rgb(0 0 0 / 12%); }
 button:disabled { cursor: default; opacity: .55; }
 
-.classroom-app { min-block-size: 100dvh; display: grid; grid-template-columns: clamp(220px, 18vw, 280px) minmax(0, 1fr); overflow: hidden; }
+.classroom-app { block-size: 100dvh; min-block-size: 100dvh; display: grid; grid-template-columns: clamp(220px, 18vw, 280px) minmax(0, 1fr); overflow: hidden; }
 .sidebar { min-block-size: 0; display: flex; flex-direction: column; gap: 24px; padding: 28px 20px; background: var(--rail); color: #f8fafc; }
 .sidebar-header p, .workspace-header p, .quick-check-label, .answer-label, .control-group-label { margin: 0; font-size: .78rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
 .sidebar-header p { color: #b9c7dc; }
